@@ -1,7 +1,6 @@
 # This is a test
 from flask import Flask, jsonify, request
 from etcd3 import client
-import types
 
 client = client(host="localhost", port=2379)
 
@@ -53,12 +52,14 @@ def get_key_val():
 def get_all_vals():
     try:
         data = client.get_all()
+        key_arr = []
         val_arr = []
 
-        for k,_ in data:
+        for k,v in data:
+            key_arr.append(v.key.decode())
             val_arr.append(k.decode())
         
-        response = {"values": val_arr}
+        response = {"keys": key_arr, "values": val_arr}
         return jsonify(response), 200
     except Exception as e:
         return jsonify({"message": f"Error {str(e)}"}), 500
