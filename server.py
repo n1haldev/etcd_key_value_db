@@ -5,9 +5,6 @@ from etcd3 import client
 client = client(host="localhost", port=2379)
 
 app = Flask("demo_server")
-# @app.route("/frontend")
-# def serve_frontend():
-#     return app.send_static_file("frontend.html")
 
 @app.route("/", methods=["GET"])
 def index():
