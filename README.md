@@ -12,6 +12,11 @@ The server has 4 endpoints:
 + /get
 + /put
 + /list
-+ /delete (TODO)
++ /delete 
++ /update
+
+To run:
++ start: etcd 
++ run: python server.py
 
 Thanks for Reading!
