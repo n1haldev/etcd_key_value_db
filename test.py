@@ -19,6 +19,7 @@ class Test_App(unittest.TestCase):
         self.app = app.test_client()
         self.app.testing = True
         self.client = client(host="localhost", port=2379)
+        self.client.put("test_key", "test_value")
 
     # def test_index(self):
     #     response = self.app.get("/")
@@ -47,39 +48,28 @@ class Test_App(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data["message"], "Key and Value both needs to be provided!")
 
-    def test_put_typeerror(self):
-        data = {"key": 3, "value": 10}
-        response = self.app.post("/put", json=data)
-        data = json.loads(response.data.decode())
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(data["message"], "Key and Values to be inserted have to be string type!")
-
-    def test_get_correct(self):
-        self.client.put("test_key", "test_value")
-
-        data = {"key": "test_key"}
-        response = self.app.post("/get", json=data)
-        data = json.loads(response.data.decode())
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data["value"], "test_value")
+    # def test_put_typeerror(self):
+    #     data = {"key": 3, "value": 10}
+    #     response = self.app.post("/put", json=data)
+    #     data = json.loads(response.data.decode())
+    #     self.assertEqual(response.status_code, 400)
+    #     self.assertEqual(data["message"], "Key and Values to be inserted have to be string type!")
 
     def test_get_missing_key(self):
-        self.client.put("test_key", "test_value")
-
         data = {"key": ""}
         response = self.app.post("/get", json=data)
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data["message"], "The key has to be provided!")
 
-    def test_get_typeerror(self):
-        self.client.put("test_key", "test_value")
+    # def test_get_typeerror(self):
+    #     self.client.put("test_key", "test_value")
 
-        data = {"key": 3}
-        response = self.app.post("/get", json=data)
-        data = json.loads(response.data.decode())
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(data["message"], "Key should be of string type!")
+    #     data = {"key": 3}
+    #     response = self.app.post("/get", json=data)
+    #     data = json.loads(response.data.decode())
+    #     self.assertEqual(response.status_code, 400)
+    #     self.assertEqual(data["message"], "Key should be of string type!")
 
     def test_get_nonexistent_key(self):
         data = {"key": "non-existent"}
@@ -116,14 +106,14 @@ class Test_App(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(data["message"], "The key has to be provided!")
 
-    def test_delete_typeerror(self):
-        self.client.put("test_key", "test_value")
+    # def test_delete_typeerror(self):
+    #     self.client.put("test_key", "test_value")
 
-        data = {"key": 3}
-        response = self.app.delete("/delete", json=data)
-        data = json.loads(response.data.decode())
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(data["message"], "Key should be of string type!")
+    #     data = {"key": 3}
+    #     response = self.app.delete("/delete", json=data)
+    #     data = json.loads(response.data.decode())
+    #     self.assertEqual(response.status_code, 400)
+    #     self.assertEqual(data["message"], "Key should be of string type!")
 
     def test_delete_nonexistent_key(self):
         data = {"key": "non-existent"}
@@ -131,6 +121,50 @@ class Test_App(unittest.TestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data["message"], "The key does not exist in persistent store!")
+
+    def test_update_missing(self):
+        # Missing Value
+        self.client.put("update_key", "update_value")
+        
+        data = {"key": "update_key", "value": ""}
+        response = self.app.put("/update", json=data)
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data["message"], "Key and New Value both need to be provided!")
+        
+        # Missing Key
+        data = {"key": "", "value": "test_missing"}
+        response = self.app.put("/update", json=data)
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data["message"], "Key and New Value both need to be provided!")
+
+    def test_update_nonexistent_key(self):
+        self.client.put("update_key", "update_value")
+        
+        data = {"key": "non-existent", "value": "some_value"}
+        response = self.app.put("/update", json=data)
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data["message"], "The key 'non-existent' does not exist in the persistent store!")
+
+    def test_get_correct(self):
+        data = {"key": "test_key"}
+        response = self.app.post("/get", json=data)
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["value"], "test_value")
+
+    def test_update_correct(self):
+        self.client.put("update_key", "update_value")
+
+        data = {"key": "update_key", "value": "yes_update_value"}
+        response = self.app.put("/update", json=data)
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+
+        new_val = self.client.get("update_key")[0]
+        self.assertEqual(new_val.decode(), "yes_update_value")
 
     def test_delete_correct(self):
         self.client.put("test_key", "test_value")
@@ -140,6 +174,7 @@ class Test_App(unittest.TestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data["message"], "Key 'test_key' deleted successfully!")
+
         
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(Test_App)

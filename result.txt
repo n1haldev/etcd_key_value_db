@@ -1,7 +1,12 @@
+PASS : __main__.Test_App.test_delete_correct
+PASS : __main__.Test_App.test_delete_missing_key
+PASS : __main__.Test_App.test_delete_nonexistent_key
 PASS : __main__.Test_App.test_get_correct
 PASS : __main__.Test_App.test_get_missing_key
 PASS : __main__.Test_App.test_get_nonexistent_key
-PASS : __main__.Test_App.test_get_typeerror
+PASS : __main__.Test_App.test_list_all
 PASS : __main__.Test_App.test_put_correct
 PASS : __main__.Test_App.test_put_missing
-PASS : __main__.Test_App.test_put_typeerror
+PASS : __main__.Test_App.test_update_correct
+PASS : __main__.Test_App.test_update_missing
+PASS : __main__.Test_App.test_update_nonexistent_key
