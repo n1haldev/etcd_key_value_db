@@ -77,6 +77,11 @@ def delete_key():
         
         if not isinstance(key, str):
             return jsonify({"message": "Key should be of string type!"}), 400
+        
+        val = client.get(key)[0]
+
+        if val is None:
+            return jsonify({"message": "The key does not exist in persistent store!"}), 404
 
         client.delete(key)
         return jsonify({"message": f"Key '{key}' deleted successfully!"}), 200
