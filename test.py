@@ -66,7 +66,7 @@ class Test_App(unittest.TestCase):
     def test_get_missing_key(self):
         self.client.put("test_key", "test_value")
 
-        data = {}
+        data = {"key": ""}
         response = self.app.post("/get", json=data)
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 400)
@@ -87,6 +87,59 @@ class Test_App(unittest.TestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(response.status_code, 404)
         self.assertEqual(data["message"], "The key does not exist in persistent store!")
+
+    def test_list_all(self):
+        data = self.client.get_all()
+        key_arr = []
+        val_arr = []
+
+        for k,v in data:
+            key_arr.append(v.key.decode())
+            val_arr.append(k.decode())
+
+        response = self.app.get("/list")
+        data = json.loads(response.data.decode())
+        resp_keys = data["keys"]
+        resp_vals = data["values"]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(resp_keys, key_arr)
+        self.assertEqual(resp_vals, val_arr)
+
+
+    def test_delete_missing_key(self):
+        self.client.put("test_key", "test_value")
+
+        data = {"key": ""}
+        response = self.app.delete("/delete", json=data)
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data["message"], "The key has to be provided!")
+
+    def test_delete_typeerror(self):
+        self.client.put("test_key", "test_value")
+
+        data = {"key": 3}
+        response = self.app.delete("/delete", json=data)
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(data["message"], "Key should be of string type!")
+
+    def test_delete_nonexistent_key(self):
+        data = {"key": "non-existent"}
+        response = self.app.delete("/delete", json=data)
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data["message"], "The key does not exist in persistent store!")
+
+    def test_delete_correct(self):
+        self.client.put("test_key", "test_value")
+
+        data = {"key": "test_key"}
+        response = self.app.delete("/delete", json=data)
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["message"], "Key 'test_key' deleted successfully!")
         
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(Test_App)
