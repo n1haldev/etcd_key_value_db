@@ -1,150 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>etcd Operations</title>
-</head>
-<body>
-    <h1>etcd Operations</h1>
-
-    <h2>Put Key-Value Pair</h2>
-    <form id="putForm">
-        <label for="putKey">Key:</label>
-        <input type="text" id="putKey" name="key">
-        <label for="putValue">Value:</label>
-        <input type="text" id="putValue" name="value">
-        <button type="submit">Put</button>
-    </form>
-
-    <h2>Get Value for Key</h2>
-    <form id="getForm">
-        <label for="getKey">Key:</label>
-        <input type="text" id="getKey" name="key">
-        <button type="submit">Get</button>
-    </form>
-    <p id="getValue"></p>
-
-    <h2>List All Key-Value Pairs</h2>
-<form id="listForm">
-    <button type="submit">List All</button>
-</form>
-<p id="listResult"></p>
-
-<h2>Update Value for Key</h2>
-<form id="updateForm">
-    <label for="updateKey">Key:</label>
-    <input type="text" id="updateKey" name="key">
-    <label for="updateValue">New Value:</label>
-    <input type="text" id="updateValue" name="value">
-    <button type="submit">Update</button>
-</form>
-
-<h2>Delete Key</h2>
-<form id="deleteForm">
-    <label for="deleteKey">Key:</label>
-    <input type="text" id="deleteKey" name="key">
-    <button type="submit">Delete</button>
-</form>
-
-
-    
-
-    <script>
-        document.getElementById("putForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            let formData = new FormData(this);
-            fetch("/put", {
-                method: "POST",
-                body: JSON.stringify(Object.fromEntries(formData)),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }).then(response => {
-                if (response.ok) {
-                    alert("Key-value pair inserted successfully!");
-                } else {
-                    alert("Error inserting key-value pair!");
-                }
-            });
-        });
-
-        document.getElementById("getForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            let formData = new FormData(this);
-            fetch("/get", {
-                method: "POST",
-                body: JSON.stringify(Object.fromEntries(formData)),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }).then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error("Error getting value for key!");
-                }
-            }).then(data => {
-                document.getElementById("getValue").innerText = `Value: ${data.value}`;
-            }).catch(error => {
-                alert(error.message);
-            });
-        });
-        document.getElementById("listForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-    fetch("/list")
-        .then(response => response.json())
-        .then(data => {
-            // Display list result
-            document.getElementById("listResult").innerText = JSON.stringify(data);
-        })
-        .catch(error => {
-            alert("Error listing key-value pairs!");
-        });
-});
-
-document.getElementById("updateForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-    let formData = new FormData(this);
-    fetch("/update", {
-        method: "PUT",
-        body: JSON.stringify(Object.fromEntries(formData)),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    }).then(response => {
-        if (response.ok) {
-            alert("Key updated successfully!");
-        } else {
-            alert("Error updating key!");
-        }
-    });
-});
-
-document.getElementById("deleteForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-    let formData = new FormData(this);
-    fetch("/delete", {
-        method: "DELETE",
-        body: JSON.stringify(Object.fromEntries(formData)),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    }).then(response => {
-        if (response.ok) {
-            alert("Key deleted successfully!");
-        } else {
-            alert("Error deleting key!");
-        }
-    });
-});
-
-        
-    </script>
-</body>
-</html> -->
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -272,31 +125,40 @@ document.getElementById("deleteForm").addEventListener("submit", function(event)
                 if (response.ok) {
                     alert("Key-value pair inserted successfully!");
                 } else {
-                    alert("Error inserting key-value pair!");
+                    response.json().then(data => {
+                        alert("Error: " + data.message);
+                    });
                 }
+            }).catch(error => {
+                alert("Error: " + error.message);
             });
+            
         });
 
         document.getElementById("getForm").addEventListener("submit", function(event) {
             event.preventDefault();
             let formData = new FormData(this);
-            fetch("/get", {
-                method: "POST",
-                body: JSON.stringify(Object.fromEntries(formData)),
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }).then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error("Error getting value for key!");
-                }
-            }).then(data => {
-                document.getElementById("getValue").innerText = `Value: ${data.value}`;
-            }).catch(error => {
-                alert(error.message);
+            event.preventDefault();
+    
+    fetch("/get", {
+        method: "POST",
+        body: JSON.stringify(Object.fromEntries(formData)),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            return response.json().then(data => {
+                throw new Error(data.message);
             });
+        }
+    }).then(data => {
+        document.getElementById("getValue").innerText = `Value: ${data.value}`;
+    }).catch(error => {
+        alert("Error: " + error.message);
+    });
         });
 
 document.getElementById("listForm").addEventListener("submit", function(event) {
@@ -329,8 +191,12 @@ document.getElementById("updateForm").addEventListener("submit", function(event)
         if (response.ok) {
             alert("Key updated successfully!");
         } else {
-            alert("Error updating key!");
+            return response.json().then(data => {
+                throw new Error(data.message);
+            });
         }
+    }).catch(error => {
+        alert("Error: " + error.message);
     });
 });
 
@@ -347,11 +213,15 @@ document.getElementById("deleteForm").addEventListener("submit", function(event)
         if (response.ok) {
             alert("Key deleted successfully!");
         } else {
-            alert("Error deleting key!");
+            return response.json().then(data => {
+                throw new Error(data.message);
+            });
         }
+    }).catch(error => {
+        alert("Error: " + error.message);
     });
 });
 
-    </script>
+</script>
 </body>
 </html>
