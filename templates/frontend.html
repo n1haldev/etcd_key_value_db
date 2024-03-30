@@ -139,7 +139,7 @@ document.getElementById("deleteForm").addEventListener("submit", function(event)
     });
 });
 
-        // Add similar event listeners for other operations (list, update, delete)
+        
     </script>
 </body>
 </html> -->
@@ -200,6 +200,16 @@ document.getElementById("deleteForm").addEventListener("submit", function(event)
         p {
             margin-top: 20px;
             font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
     </style>
 </head>
@@ -288,19 +298,24 @@ document.getElementById("deleteForm").addEventListener("submit", function(event)
                 alert(error.message);
             });
         });
-        document.getElementById("listForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-    fetch("/list")
-        .then(response => response.json())
-        .then(data => {
-            // Display list result
-            document.getElementById("listResult").innerText = JSON.stringify(data);
-        })
-        .catch(error => {
-            alert("Error listing key-value pairs!");
-        });
-});
 
+document.getElementById("listForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            fetch("/list")
+                .then(response => response.json())
+                .then(data => {
+                    let table = "<table><tr><th>Key</th><th>Value</th></tr>";
+                    for (let i = 0; i < data.keys.length; i++) {
+                        table += `<tr><td>${data.keys[i]}</td><td>${data.values[i]}</td></tr>`;
+                    }
+                    table += "</table>";
+                    document.getElementById("listResult").innerHTML = table;
+                })
+                .catch(error => {
+                    alert("Error listing key-value pairs!");
+                });
+        });
+        
 document.getElementById("updateForm").addEventListener("submit", function(event) {
     event.preventDefault();
     let formData = new FormData(this);
