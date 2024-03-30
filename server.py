@@ -18,7 +18,7 @@ def put_key_val():
         key = data.get("key")
         val = data.get("value")
 
-        if key is None or val is None:
+        if key=="" or val=="":
             return jsonify({"message": "Key and Value both needs to be provided!"}), 400
         
         if not isinstance(key, str) or not isinstance(val, str):
@@ -35,7 +35,7 @@ def get_key_val():
         data = request.get_json()
         key = data.get("key")
 
-        if key is None:
+        if key=="":
             return jsonify({"message": "The key has to be provided!"}), 400
         
         if not isinstance(key, str):
@@ -72,7 +72,7 @@ def delete_key():
         data = request.get_json()
         key = data.get("key")
 
-        if key is None:
+        if key=="":
             return jsonify({"message": "The key has to be provided!"}), 400
         
         if not isinstance(key, str):
@@ -90,7 +90,7 @@ def update_key_val():
         key = data.get("key")
         new_value = data.get("value")
 
-        if key is None or new_value is None:
+        if key=="" or new_value=="":
             return jsonify({"message": "Key and New Value both need to be provided!"}), 400
         
         if not isinstance(key, str) or not isinstance(new_value, str):
