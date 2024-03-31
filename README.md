@@ -19,4 +19,10 @@ To run:
 + start: etcd 
 + run: python server.py
 
+TODO:
+- [x] Single cluster run
+- [x] Write Unit Tests
+- [ ] Multi-cluster run
+- [ ] Elaborate README.md
+
 Thanks for Reading!
